@@ -105,7 +105,7 @@ namespace BlatantShopping
 
 
 			// Look up the regular price
-			decimal regularPrice = 0;
+			decimal regularPrice;
 			if (priceCatalog.ContainsKey(product.ToLower()))
 			{
 				regularPrice = priceCatalog[product.ToLower()] * quantity;
