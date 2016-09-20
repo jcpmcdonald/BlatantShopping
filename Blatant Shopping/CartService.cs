@@ -9,15 +9,15 @@ namespace BlatantShopping
 {
 	class CartService
 	{
-		public Dictionary<String, decimal> GetCartFromFile(String filename)
+		public Dictionary<String, int> GetCartFromFile(String filename)
 		{
 			return GetCartFromString(File.ReadAllLines(filename));
 		}
 
 
-		public Dictionary<String, decimal> GetCartFromString(String[] products)
+		public Dictionary<String, int> GetCartFromString(String[] products)
 		{
-			Dictionary<String, decimal> shoppingCart = new Dictionary<String, decimal>();
+			Dictionary<String, int> shoppingCart = new Dictionary<String, int>();
 
 			foreach (var product in products)
 			{

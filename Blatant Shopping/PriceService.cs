@@ -89,6 +89,11 @@ namespace BlatantShopping
 		/// <returns>The best price for the product and quantity</returns>
 		public decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
+			if (quantity == 0)
+			{
+				return 0;
+			}
+
 			// Look for any sales
 			decimal bestSalePrice = decimal.MaxValue;
 			if (saleCatalog != null && saleCatalog.ContainsKey(product.ToLower()))
@@ -96,7 +101,19 @@ namespace BlatantShopping
 				var sales = saleCatalog[product.ToLower()];
 				foreach (var sale in sales)
 				{
+					int quantityAppliedTo = sale.QuantityAppliedTo(quantity);
+					if (quantityAppliedTo > 0)
+					{
+						int quantityLeftOut = quantity - quantityAppliedTo;
+						decimal salePrice = sale.GetSalePrice(quantity);
 
+						decimal priceForLeftovers = GetPrice(product, quantityLeftOut, priceCatalog, saleCatalog);
+
+						if ((salePrice + priceForLeftovers) < bestSalePrice)
+						{
+							bestSalePrice = (salePrice + priceForLeftovers);
+						}
+					}
 				}
 			}
 			

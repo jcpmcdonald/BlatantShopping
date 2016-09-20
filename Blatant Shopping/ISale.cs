@@ -7,6 +7,7 @@ namespace BlatantShopping
 {
 	interface ISale
 	{
-		 
+		decimal GetSalePrice(int quantity);
+		int QuantityAppliedTo(int quantity);
 	}
 }

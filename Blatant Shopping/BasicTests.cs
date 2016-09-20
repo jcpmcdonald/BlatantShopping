@@ -14,7 +14,7 @@ namespace BlatantShopping
 		[Test]
 		public void SimplePriceLoad()
 		{
-			PriceService priceService = new PriceService();
+			var priceService = new PriceService();
 
 			// Load a simple list
 			var simplePriceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75' }");
@@ -28,7 +28,7 @@ namespace BlatantShopping
 		{
 			// All forms of empty price lists are invalid and should fail as soon as they are noticed
 
-			PriceService priceService = new PriceService();
+			var priceService = new PriceService();
 
 			// Load an empty list
 			Assert.Throws<ArgumentException>(() => priceService.GetPriceCatalog("{ }"));
@@ -43,7 +43,7 @@ namespace BlatantShopping
 		[Test]
 		public void DuplicatePriceLoad()
 		{
-			PriceService priceService = new PriceService();
+			var priceService = new PriceService();
 
 			// Load a list with duplicates, even though duplicate keys aren't technically allowed in JSON, and are strictly forbidden in a Dictionary<>
 			var duplicatePriceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75' , 'banana': '0.60'}");
@@ -56,7 +56,7 @@ namespace BlatantShopping
 		[Test]
 		public void MixedCasePriceLoad()
 		{
-			PriceService priceService = new PriceService();
+			var priceService = new PriceService();
 
 			// Mixed case
 			var mixedCasePriceCatalog = priceService.GetPriceCatalog("{ 'bAnAnA': '0.75', 'aPPle': '1.75' }");
@@ -72,9 +72,9 @@ namespace BlatantShopping
 
 
 		[Test]
-		public void RegularPrice()
+		public void RegularPriceItems()
 		{
-			PriceService priceService = new PriceService();
+			var priceService = new PriceService();
 			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
 
 			Assert.That(priceService.GetRegularPrice("Apple", 1, priceCatalog), Is.EqualTo(1.75m));
@@ -84,7 +84,7 @@ namespace BlatantShopping
 		[Test]
 		public void SimpleCartLoad()
 		{
-			CartService cartService = new CartService();
+			var cartService = new CartService();
 			var cart = cartService.GetCartFromString(new[]{ "aPPle", "baNana" });
 			Assert.That(cart, Is.Not.Null);
 			Assert.That(cart["apple"], Is.EqualTo(1));
@@ -95,11 +95,60 @@ namespace BlatantShopping
 		public void DuplicateCartLoad()
 		{
 			// Test loading duplicate, and out of order items
-			CartService cartService = new CartService();
+			var cartService = new CartService();
 			var cart = cartService.GetCartFromString(new[] { "aPPle", "baNana", "appLe", "Banana", "bAnana" });
 			Assert.That(cart, Is.Not.Null);
 			Assert.That(cart["apple"], Is.EqualTo(2));
 			Assert.That(cart["banana"], Is.EqualTo(3));
+		}
+
+
+		[Test]
+		public void RegularPriceCart()
+		{
+			var cartService = new CartService();
+			var cart1 = cartService.GetCartFromString(new[] { "apple", "apple" });
+			var cart2 = cartService.GetCartFromString(new[] { "apple", "grapefruit", "grapefruit", "grapefruit", "grapefruit", "grapefruit" });
+
+			var priceService = new PriceService();
+			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
+			
+
+			Assert.That(priceService.GetPrice(cart1, priceCatalog, null),
+			            Is.EqualTo(1.75m * 2));
+			Assert.That(priceService.GetPrice(cart2, priceCatalog, null),
+			            Is.EqualTo((1.75m * 1) + (5m * 5)));
+		}
+
+
+		[Test]
+		public void BasicSalePrice()
+		{
+			var cartService = new CartService();
+			var cart1 = cartService.GetCartFromString(new[] { "apple", "apple" });
+			var cart2 = cartService.GetCartFromString(new[] { "apple", "apple", "apple", "grapefruit" });
+
+			var priceService = new PriceService();
+			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
+
+			// Apples for sale: $0.50 each
+			var sales = new Dictionary<String, List<ISale>>{ { "apple", new List<ISale>{ new SalePrice(0.50m) } } };
+
+			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
+			            Is.EqualTo(0.50m * 2));
+
+			Assert.That(priceService.GetPrice(cart2, priceCatalog, sales),
+			            Is.EqualTo((0.50m * 3) + 5m));
+		}
+
+
+		[Test]
+		public void SimpleSaleLoadFromJson()
+		{
+			var saleService = new SaleService();
+			var sales = saleService.GetSalesFromJson("{'apple':[{'$type':'BlatantShopping.SalePrice, BlatantShopping', 'salePrice':0.50}]}");
+			
+			Assert.That(sales["apple"][0].GetSalePrice(1), Is.EqualTo(0.50));
 		}
 	}
 }
