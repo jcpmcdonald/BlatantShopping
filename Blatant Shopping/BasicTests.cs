@@ -39,6 +39,12 @@ namespace BlatantShopping
 			// The last value for bananas should take effect
 			Assert.That(duplicatePriceList["bananas"], Is.EqualTo(0.60m));
 
+			// Mixed case
+			var mixedCasePriceList = priceService.GetPriceList(@"{ 'bAnAnAs': '0.75', 'aPPles': '1.75' }");
+			Assert.That(simplePriceList, Is.Not.Null);
+			// ToLower() will always be used when looking up prices
+			Assert.That(simplePriceList["baNaNas".ToLower()], Is.EqualTo(0.75m));
+			Assert.That(simplePriceList["AppLes".ToLower()], Is.EqualTo(1.75m));
 		}
 
 

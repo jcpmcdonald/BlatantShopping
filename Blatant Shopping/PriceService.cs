@@ -20,9 +20,12 @@ namespace BlatantShopping
 		{
 			if (String.IsNullOrEmpty(json))
 			{
-				throw new ArgumentException("json can not be null or empty");
+				throw new ArgumentException("The parameter 'json' can not be null or empty");
 			}
-			return JsonConvert.DeserializeObject<Dictionary<string, decimal>>(json);
+
+			// Lowercase all the JSON. The only string to be affected is the product name, which we want to be lower case
+			var priceList = JsonConvert.DeserializeObject<Dictionary<string, decimal>>(json.ToLowerInvariant());
+			return priceList;
 		}
 
 
@@ -49,6 +52,9 @@ namespace BlatantShopping
 			{
 				
 			}
+
+			// If any sales matched the product, but there are items that didn't fit in the sale, recursively find 
+
 
 			// Look up the regular price
 			decimal regularPrice = priceList[product] * quantity;
