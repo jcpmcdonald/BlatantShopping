@@ -19,7 +19,8 @@ namespace BlatantShopping
 			}
 			catch (ArgumentException ae)
 			{
-				throw new InvalidDataException(String.Format("File '{0}' is null or empty", filename));
+				// Fail closer to the real issue
+				throw new InvalidDataException(String.Format("File '{0}' is null or empty", filename), ae);
 			}
 		}
 
@@ -32,8 +33,17 @@ namespace BlatantShopping
 
 			// Lowercase all the JSON. The only string to be affected is the product name, which we want to be lower case
 			var priceList = JsonConvert.DeserializeObject<Dictionary<string, decimal>>(json.ToLowerInvariant());
+
+			if (!priceList.Any())
+			{
+				throw new ArgumentException("The price list is empty");
+			}
+
 			return priceList;
 		}
+
+		
+
 
 
 		/// <summary>
@@ -50,10 +60,22 @@ namespace BlatantShopping
 			// Go through each item in the shopping list and get the best price
 			foreach (var item in shoppingList)
 			{
-				total += GetPrice(item.Key, item.Value, priceCatalog, saleCatalog);
+				decimal regularPrice = GetRegularPrice(item.Key, item.Value, priceCatalog);
+				decimal salePrice = GetPrice(item.Key, item.Value, priceCatalog, saleCatalog);
+
+				// TODO: Add a line item for the product, with the amount saved (if any)
+
+				total += Math.Min(salePrice, regularPrice);
 			}
 
 			return total;
+		}
+
+
+		public decimal GetRegularPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog)
+		{
+			// Return the price without any sales
+			return GetPrice(product, quantity, priceCatalog, null);
 		}
 
 
@@ -69,20 +91,24 @@ namespace BlatantShopping
 		{
 			// Look for any sales
 			decimal bestSalePrice = decimal.MaxValue;
-			var sales = saleCatalog[product.ToLower()];
-			foreach (var sale in sales)
+			if (saleCatalog != null && saleCatalog.ContainsKey(product.ToLower()))
 			{
-				
+				var sales = saleCatalog[product.ToLower()];
+				foreach (var sale in sales)
+				{
+
+				}
 			}
+			
 
 			// If any sales matched the product, but there are items that didn't fit in the sale, recursively find a price for the remaining
 
 
 			// Look up the regular price
 			decimal regularPrice = 0;
-			if (priceCatalog.ContainsKey(product))
+			if (priceCatalog.ContainsKey(product.ToLower()))
 			{
-				regularPrice = priceCatalog[product] * quantity;
+				regularPrice = priceCatalog[product.ToLower()] * quantity;
 			}
 			else
 			{
