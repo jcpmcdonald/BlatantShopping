@@ -11,12 +11,19 @@ namespace BlatantShopping
 	class PriceService
 	{
 
-		public Dictionary<String, decimal> GetPriceListFromFile(String filename)
+		public Dictionary<String, decimal> GetPriceCatalogFromFile(String filename)
 		{
-			return GetPriceList(File.ReadAllText(filename));
+			try
+			{
+				return GetPriceCatalog(File.ReadAllText(filename));
+			}
+			catch (ArgumentException ae)
+			{
+				throw new InvalidDataException(String.Format("File '{0}' is null or empty", filename));
+			}
 		}
 
-		public Dictionary<String, decimal> GetPriceList(String json)
+		public Dictionary<String, decimal> GetPriceCatalog(String json)
 		{
 			if (String.IsNullOrEmpty(json))
 			{
@@ -29,35 +36,59 @@ namespace BlatantShopping
 		}
 
 
-		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceList, Dictionary<String, List<ISale>> saleList)
+		/// <summary>
+		/// Returns the best price for the provided shopping list
+		/// </summary>
+		/// <param name="shoppingList">The shopping list, provided in a dictionary&gt;&lt; of products and quantities</param>
+		/// <param name="priceCatalog">A price catalog</param>
+		/// <param name="saleCatalog">A catalog of all the current sales</param>
+		/// <returns>The best price for the provided shopping list</returns>
+		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
 			decimal total = 0;
 
 			// Go through each item in the shopping list and get the best price
 			foreach (var item in shoppingList)
 			{
-				total += GetPrice(item.Key, item.Value, priceList, saleList);
+				total += GetPrice(item.Key, item.Value, priceCatalog, saleCatalog);
 			}
 
 			return total;
 		}
 
 
-		public decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceList, Dictionary<String, List<ISale>> saleList)
+		/// <summary>
+		/// Returns the best price for the provided product and quantity of product
+		/// </summary>
+		/// <param name="product">The product's name</param>
+		/// <param name="quantity">The product's quantity</param>
+		/// <param name="priceCatalog">A price catalog</param>
+		/// <param name="saleCatalog">A catalog of all the current sales</param>
+		/// <returns>The best price for the product and quantity</returns>
+		public decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
 			// Look for any sales
 			decimal bestSalePrice = decimal.MaxValue;
-			var sales = saleList[product.ToLower()];
+			var sales = saleCatalog[product.ToLower()];
 			foreach (var sale in sales)
 			{
 				
 			}
 
-			// If any sales matched the product, but there are items that didn't fit in the sale, recursively find 
+			// If any sales matched the product, but there are items that didn't fit in the sale, recursively find a price for the remaining
 
 
 			// Look up the regular price
-			decimal regularPrice = priceList[product] * quantity;
+			decimal regularPrice = 0;
+			if (priceCatalog.ContainsKey(product))
+			{
+				regularPrice = priceCatalog[product] * quantity;
+			}
+			else
+			{
+				// Fail fast
+				throw new Exception(String.Format("Product '{0}' is missing a regular price", product));
+			}
 
 			// Return the cheapest price
 			return Math.Min(bestSalePrice, regularPrice);
