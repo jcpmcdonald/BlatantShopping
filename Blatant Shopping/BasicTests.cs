@@ -192,7 +192,6 @@ namespace BlatantShopping
 			// Buy 2 apples for $2.00
 			var sales = new Dictionary<String, List<ISale>> { { "apple", new List<ISale> { new GroupSale(2, 2.00m), new SalePrice(1.25m) } } };
 
-
 			// Best combination of 3 apples is $3.25  (2 for $2 + 1 for $1.25)
 			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
 						Is.EqualTo(3.25m));

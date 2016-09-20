@@ -1,0 +1,13 @@
+{
+  "apple": [
+    {
+      "$type": "BlatantShopping.Sales.GroupSale, BlatantShopping",
+      "groupSize": 2,
+      "pricePerGroup": 2.00
+    },
+    {
+      "$type": "BlatantShopping.Sales.SalePrice, BlatantShopping",
+      "salePrice": 1.25
+    }
+  ]
+}

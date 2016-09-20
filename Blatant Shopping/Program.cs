@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BlatantShopping.Services;
 
 namespace BlatantShopping
 {
@@ -19,8 +21,19 @@ namespace BlatantShopping
 				return;
 			}
 
-			
+			Directory.SetCurrentDirectory("../../../Input Files/");
 
+			var cartService = new CartService();
+			var cart = cartService.GetCartFromFile(args[0]);
+
+			var priceService = new PriceService();
+			var priceCatalog = priceService.GetPriceCatalogFromFile("priceCatalog.json");
+
+			var saleService = new SaleService();
+			var sales = saleService.GetSalesFromFile("saleCatalog.json");
+
+			Console.WriteLine(priceService.GetPrice(cart, priceCatalog, sales));
+			Console.ReadKey();
 		}
 	}
 }

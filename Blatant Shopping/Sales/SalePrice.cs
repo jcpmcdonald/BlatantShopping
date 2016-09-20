@@ -2,7 +2,7 @@
 {
 	class SalePrice : ISale
 	{
-		private decimal salePrice;
+		public decimal salePrice;
 
 
 		public SalePrice(decimal salePrice)

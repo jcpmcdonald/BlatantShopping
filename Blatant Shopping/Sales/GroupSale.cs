@@ -12,8 +12,8 @@ namespace BlatantShopping.Sales
 	/// </summary>
 	class GroupSale : ISale
 	{
-		private int groupSize;
-		private decimal pricePerGroup;
+		public int groupSize;
+		public decimal pricePerGroup;
 
 
 		public GroupSale(int groupSize, decimal pricePerGroup)
