@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BlatantShopping.Sales;
 using Newtonsoft.Json;
 
-namespace BlatantShopping
+namespace BlatantShopping.Services
 {
 	class SaleService
 	{

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BlatantShopping.Sales;
+using BlatantShopping.Services;
 using Newtonsoft.Json;
 using NUnit.Framework;
 
@@ -131,14 +133,14 @@ namespace BlatantShopping
 			var priceService = new PriceService();
 			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
 
-			// Apples for sale: $0.50 each
-			var sales = new Dictionary<String, List<ISale>>{ { "apple", new List<ISale>{ new SalePrice(0.50m) } } };
+			// Apples on sale for $1 each
+			var sales = new Dictionary<String, List<ISale>>{ { "apple", new List<ISale>{ new SalePrice(1.00m) } } };
 
 			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
-			            Is.EqualTo(0.50m * 2));
+			            Is.EqualTo(1.00m * 2));
 
 			Assert.That(priceService.GetPrice(cart2, priceCatalog, sales),
-			            Is.EqualTo((0.50m * 3) + 5m));
+			            Is.EqualTo((1.00m * 3) + 5m));
 		}
 
 
@@ -146,9 +148,58 @@ namespace BlatantShopping
 		public void SimpleSaleLoadFromJson()
 		{
 			var saleService = new SaleService();
-			var sales = saleService.GetSalesFromJson("{'apple':[{'$type':'BlatantShopping.SalePrice, BlatantShopping', 'salePrice':0.50}]}");
+			// Bring in the assembly name dynamically instead of hard-coding to allow for easier refactoring
+			var sales = saleService.GetSalesFromJson(String.Format("{{'apple':[{{'$type':'{0}', 'salePrice':0.50}}]}}", typeof(SalePrice).AssemblyQualifiedName));
 			
 			Assert.That(sales["apple"][0].GetSalePrice(1), Is.EqualTo(0.50));
+		}
+
+
+		[Test]
+		public void GroupSale()
+		{
+			var cartService = new CartService();
+			var cart1 = cartService.GetCartFromString(new[] { "apple", "apple" });
+			var cart2 = cartService.GetCartFromString(new[] { "apple", "apple", "apple", "grapefruit" });
+
+			var priceService = new PriceService();
+			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
+
+			// Buy 2 apples for $2
+			var sales = new Dictionary<String, List<ISale>> { { "apple", new List<ISale> { new GroupSale(2, 2.00m) } } };
+
+			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
+						Is.EqualTo(2.00m));
+
+			// First 2 apples are $2, 3rd apple is 1.75 (and grapefruit is $5)
+			Assert.That(priceService.GetPrice(cart2, priceCatalog, sales),
+						Is.EqualTo(2.00m + 1.75m + 5m));
+		}
+
+
+		[Test]
+		public void GroupAndFixedSale()
+		{
+			var cartService = new CartService();
+			var cart1 = cartService.GetCartFromString(new[] { "apple", "apple", "apple" });
+			var cart2 = cartService.GetCartFromString(new[] { "apple", "apple", "apple", "apple" });
+
+			var priceService = new PriceService();
+			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
+
+			// Buy 1 apple for $1.25
+			// OR
+			// Buy 2 apples for $2.00
+			var sales = new Dictionary<String, List<ISale>> { { "apple", new List<ISale> { new GroupSale(2, 2.00m), new SalePrice(1.25m) } } };
+
+
+			// Best combination of 3 apples is $3.25  (2 for $2 + 1 for $1.25)
+			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
+						Is.EqualTo(3.25m));
+
+			// Best combination of 4 apples is $4 (2 for $2, twice)
+			Assert.That(priceService.GetPrice(cart2, priceCatalog, sales),
+						Is.EqualTo(4.00m));
 		}
 	}
 }

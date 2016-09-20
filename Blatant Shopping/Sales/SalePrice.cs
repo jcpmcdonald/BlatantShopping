@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BlatantShopping
+﻿namespace BlatantShopping.Sales
 {
 	class SalePrice : ISale
 	{
-		public decimal salePrice;
+		private decimal salePrice;
 
 
 		public SalePrice(decimal salePrice)
