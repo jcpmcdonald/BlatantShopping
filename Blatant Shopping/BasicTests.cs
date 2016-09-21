@@ -228,34 +228,5 @@ namespace BlatantShopping
 			Assert.That(priceService.GetPrice(cart3, priceCatalog, sales),
 						Is.EqualTo(0.50m * 6));
 		}
-
-
-		[Test]
-		public void BelowThresholdSale()
-		{
-			var cartService = new CartService();
-			var cart1 = cartService.GetCartFromString(new[] { "apple", "apple", "apple" }); // 3
-			var cart2 = cartService.GetCartFromString(new[] { "apple", "apple", "apple", "apple" }); // 4
-			var cart3 = cartService.GetCartFromString(new[] { "apple", "apple", "apple", "apple", "apple", "apple" }); // 6
-
-			var priceService = new PriceService();
-			var priceCatalog = priceService.GetPriceCatalog("{ 'banana': '0.75', 'apple': '1.75', 'orange': '2.50', 'grapefruit': '5.00'}");
-
-			// Buy 4 or fewer apples for $0.50 each
-			var sales = new Dictionary<String, List<ISale>> { { "apple", new List<ISale> { new BelowThresholdSale(4, 0.50m) } } };
-
-			// This is under the threshold
-			Assert.That(priceService.GetPrice(cart1, priceCatalog, sales),
-						Is.EqualTo(0.50m * 3));
-
-			// At the threshold
-			Assert.That(priceService.GetPrice(cart2, priceCatalog, sales),
-						Is.EqualTo(0.50m * 4));
-
-			// Above the threshold, no deal
-			Assert.That(priceService.GetPrice(cart3, priceCatalog, sales),
-						Is.EqualTo(1.75m * 6));
-		}
-
 	}
 }
