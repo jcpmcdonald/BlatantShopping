@@ -54,7 +54,7 @@ namespace BlatantShopping.Services
 		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
 			// Throw away the receipt
-			StringBuilder receipt;
+			Receipt receipt;
 			return GetPrice(shoppingList, priceCatalog, saleCatalog, out receipt);
 		}
 
@@ -67,11 +67,11 @@ namespace BlatantShopping.Services
 		/// <param name="priceCatalog">A price catalog</param>
 		/// <param name="saleCatalog">A catalog of all the current sales</param>
 		/// <returns>The best price for the provided shopping list</returns>
-		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, out StringBuilder receipt)
+		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, out Receipt receipt)
 		{
 			decimal total = 0;
 			decimal totalSavings = 0;
-			receipt = new StringBuilder();
+			receipt = new Receipt();
 
 			// Go through each item in the shopping list and get the best price
 			foreach (var item in shoppingList)
@@ -83,13 +83,13 @@ namespace BlatantShopping.Services
 				decimal salePrice = GetPrice(product, quantity, priceCatalog, saleCatalog);
 
 				decimal pricePaid = Math.Min(salePrice, regularPrice);
-				receipt.AppendLine(String.Format("{1,4}{0,-20}{2,7}", product, quantity + "x ", pricePaid));
+				receipt.AddProduct(quantity, product, pricePaid);
 
 				if (salePrice < regularPrice)
 				{
 					decimal savings = regularPrice - salePrice;
 					totalSavings += savings;
-					receipt.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "You saved", "(-" + savings + ")"));
+					receipt.AddSavings(savings);
 				}
 
 				total += pricePaid;
@@ -97,8 +97,7 @@ namespace BlatantShopping.Services
 
 			if (totalSavings > 0)
 			{
-				receipt.AppendLine();
-				receipt.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "Total saved", "(-" + totalSavings + ")"));
+				receipt.AddTotalSaved(totalSavings);
 			}
 
 			return total;
