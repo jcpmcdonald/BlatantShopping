@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace BlatantShopping
@@ -34,9 +35,8 @@ namespace BlatantShopping
 		}
 
 
-		public void AddSaleReasoning(String saleReasoning)
+		public void AddSaleReasoning(List<String> saleReasons)
 		{
-			String[] saleReasons = saleReasoning.Split('\n');
 			foreach (var saleReason in saleReasons)
 			{
 				receiptBuilder.AppendLine(String.Format("{0,8}{1,-16}", "", saleReason));

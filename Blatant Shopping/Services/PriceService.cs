@@ -53,11 +53,10 @@ namespace BlatantShopping.Services
 		/// <returns>The best price for the provided shopping list</returns>
 		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
-			// Throw away the receipt
+			// Throw the receipt away
 			Receipt receipt;
 			return GetPrice(shoppingList, priceCatalog, saleCatalog, out receipt);
 		}
-
 
 
 		/// <summary>
@@ -66,6 +65,7 @@ namespace BlatantShopping.Services
 		/// <param name="shoppingList">The shopping list, provided in a dictionary&gt;&lt; of products and quantities</param>
 		/// <param name="priceCatalog">A price catalog</param>
 		/// <param name="saleCatalog">A catalog of all the current sales</param>
+		/// <param name="receipt">The itemized receipt</param>
 		/// <returns>The best price for the provided shopping list</returns>
 		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, out Receipt receipt)
 		{
@@ -78,16 +78,20 @@ namespace BlatantShopping.Services
 			{
 				String product = item.Key;
 				int quantity = item.Value;
-				String saleReasoning = "";
+				List<String> saleReasoning;
 
+				// Get both the regular and sale prices
 				decimal regularPrice = GetRegularPrice(product, quantity, priceCatalog);
-				decimal salePrice = GetPrice(product, quantity, priceCatalog, saleCatalog, ref saleReasoning);
+				decimal salePrice = GetPrice(product, quantity, priceCatalog, saleCatalog, out saleReasoning);
 
+				// Onl;y charge the minimum
 				decimal pricePaid = Math.Min(salePrice, regularPrice);
-				receipt.AddProduct(quantity, product, pricePaid);
 
+				// Add some details to the receipt
+				receipt.AddProduct(quantity, product, pricePaid);
 				receipt.AddSaleReasoning(saleReasoning);
 
+				// If there are savings for this item, calculate and display them
 				if (salePrice < regularPrice)
 				{
 					decimal savings = regularPrice - salePrice;
@@ -125,11 +129,11 @@ namespace BlatantShopping.Services
 		/// <param name="priceCatalog">A price catalog</param>
 		/// <param name="saleCatalog">A catalog of all the current sales</param>
 		/// <returns>The best price for the product and quantity</returns>
-		public decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
+		private decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
 			// Throw away the sale reasoning
-			String saleReasoning = "";
-			return GetPrice(product, quantity, priceCatalog, saleCatalog, ref saleReasoning);
+			List<String> saleReasoning;
+			return GetPrice(product, quantity, priceCatalog, saleCatalog, out saleReasoning);
 		}
 
 
@@ -140,18 +144,20 @@ namespace BlatantShopping.Services
 		/// <param name="quantity">The product's quantity</param>
 		/// <param name="priceCatalog">A price catalog</param>
 		/// <param name="saleCatalog">A catalog of all the current sales</param>
+		/// <param name="saleReasoning">A string that represents the reason for the price</param>
 		/// <returns>The best price for the product and quantity</returns>
-		private decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, ref String saleReasoning)
+		private decimal GetPrice(String product, int quantity, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, out List<String> saleReasoning)
 		{
 			// Base case for recursion
 			if (quantity == 0)
 			{
+				saleReasoning = new List<String>();
 				return 0;
 			}
 
 			// Look for any sales, and recursively look for sales on the remaining items
 			decimal bestSalePrice = decimal.MaxValue;
-			String bestSaleReason = "";
+			List<String> bestSaleReason = new List<String>();
 			if (saleCatalog != null && saleCatalog.ContainsKey(product.ToLower()))
 			{
 				var sales = saleCatalog[product.ToLower()];
@@ -166,21 +172,23 @@ namespace BlatantShopping.Services
 						decimal salePrice = sale.GetSalePrice(quantity);
 
 						// Get the best price for the leftovers
-						String leftoverSaleReason = "";
-
-						decimal priceForLeftovers = GetPrice(product, quantityLeftOut, priceCatalog, saleCatalog, ref leftoverSaleReason);
+						List<String> leftoverSaleReason;
+						decimal priceForLeftovers = GetPrice(product, quantityLeftOut, priceCatalog, saleCatalog, out leftoverSaleReason);
 
 						// If we have found a cheaper price, update the best sale price found
 						if ((salePrice + priceForLeftovers) < bestSalePrice)
 						{
 							bestSalePrice = (salePrice + priceForLeftovers);
-							if (String.IsNullOrEmpty(leftoverSaleReason))
+							if (leftoverSaleReason.Count == 0)
 							{
-								bestSaleReason = sale.GetReasoning(quantity);
+								// Start a new list of sale reasons
+								bestSaleReason = new List<string>{ sale.GetReasoning(quantity) };
 							}
 							else
 							{
-								bestSaleReason = sale.GetReasoning(quantity) + "\n" + leftoverSaleReason;
+								// Add the new sale reason to the start of the list
+								leftoverSaleReason.Insert(0, sale.GetReasoning(quantity));
+								bestSaleReason = leftoverSaleReason;
 							}
 						}
 					}
@@ -208,7 +216,7 @@ namespace BlatantShopping.Services
 			}
 			else
 			{
-				saleReasoning = String.Format("{0}@ Regular {1}ea = {2}", quantity, priceCatalog[product.ToLower()], regularPrice);
+				saleReasoning = new List<string>{ String.Format("{0}@ Regular {1}ea = {2}", quantity, priceCatalog[product.ToLower()], regularPrice) };
 				return regularPrice;
 			}
 		}
