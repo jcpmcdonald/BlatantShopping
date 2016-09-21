@@ -14,6 +14,7 @@ namespace BlatantShopping.Sales
 	{
 		public int groupSize;
 		public decimal pricePerGroup;
+		public String customReason = null;
 
 
 		public GroupSale(int groupSize, decimal pricePerGroup)
@@ -37,7 +38,14 @@ namespace BlatantShopping.Sales
 
 		public string GetReasoning(int quantity)
 		{
-			return String.Format("{0}@ {1} for {2:C} = {3:C}", QuantityAppliedTo(quantity), groupSize, pricePerGroup, GetSalePrice(quantity));
+			if (String.IsNullOrEmpty(customReason))
+			{
+				return String.Format("{0}@ {1} for {2:C} = {3:C}", QuantityAppliedTo(quantity), groupSize, pricePerGroup, GetSalePrice(quantity));
+			}
+			else
+			{
+				return String.Format("{0}@ {1} = {2:C}", QuantityAppliedTo(quantity), customReason, GetSalePrice(quantity));
+			}
 		}
 	}
 }

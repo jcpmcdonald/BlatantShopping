@@ -10,6 +10,7 @@ namespace BlatantShopping.Sales
 	{
 		public int threshold;
 		public decimal priceEachAfterThreshold;
+		public String customReason = null;
 
 		/// <summary>
 		/// If threshold or more items are purchased, get a deal
@@ -37,7 +38,14 @@ namespace BlatantShopping.Sales
 
 		public string GetReasoning(int quantity)
 		{
-			return String.Format("{0}@ Buy min {1} for {2:C}ea = {3:C}", QuantityAppliedTo(quantity), threshold, priceEachAfterThreshold, GetSalePrice(quantity));
+			if (String.IsNullOrEmpty(customReason))
+			{
+				return String.Format("{0}@ Buy min {1} for {2:C}ea = {3:C}", QuantityAppliedTo(quantity), threshold, priceEachAfterThreshold, GetSalePrice(quantity));
+			}
+			else
+			{
+				return String.Format("{0}@ {1} = {2:C}", QuantityAppliedTo(quantity), customReason, GetSalePrice(quantity));
+			}
 		}
 	}
 }

@@ -16,5 +16,13 @@
       "threshold": 2,
       "priceEachAfterThreshold": 0.50
     },
+  ],
+  "grapefruit": [
+    {
+      "$type": "BlatantShopping.Sales.GroupSale, BlatantShopping",
+      "groupSize": 2,
+      "pricePerGroup": 5.00,
+      "customReason": "2 for 1"
+    },
   ]
 }

@@ -5,6 +5,7 @@ namespace BlatantShopping.Sales
 	class SalePrice : ISale
 	{
 		public decimal salePrice;
+		public String customReason = null;
 
 
 		public SalePrice(decimal salePrice)
@@ -27,7 +28,14 @@ namespace BlatantShopping.Sales
 
 		public string GetReasoning(int quantity)
 		{
-			return String.Format("{0}@ {1:C}ea = {2:C}", QuantityAppliedTo(quantity), salePrice, GetSalePrice(quantity));
+			if (String.IsNullOrEmpty(customReason))
+			{
+				return String.Format("{0}@ {1:C}ea = {2:C}", QuantityAppliedTo(quantity), salePrice, GetSalePrice(quantity));
+			}
+			else
+			{
+				return String.Format("{0}@ {1} = {2:C}", QuantityAppliedTo(quantity), customReason, GetSalePrice(quantity));
+			}
 		}
 	}
 }
