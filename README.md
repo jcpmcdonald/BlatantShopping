@@ -17,4 +17,4 @@ A console-based kiosk checkout system that calculates the best price for your sh
   - SALE 1: Buy 3 bananas for $1.25
   - SALE 2: Bananas are on sale for $0.50
   - If 4 bananas are purchased, 3 will sell for $1.25, and the last one will sell for $0.50, for a total of $1.75
-- The "advanced requirement" sales are identical: The "Additional product discount" is a re-wording of the "Group promotional price". In both cases, you're selling bundles of products for a reduced price (2 for 1, 3 for $1). I have only implemented the "Group promotional price", which can be used as an "Additional product discount".
+- The "advanced requirement" sales are identical: The "Additional product discount" is a re-wording of the "Group promotional price". In both cases, you're selling bundles of products for a reduced price (2 for 1, 3 for $1). I have implemented the "Group promotional price", which can be used as an "Additional product discount". In addition, I have added a "Custom Reason" that can read whatever the store would like (2 for 1, buy 2 get 1 50% off, etc)
