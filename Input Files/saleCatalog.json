@@ -9,5 +9,12 @@
       "$type": "BlatantShopping.Sales.SalePrice, BlatantShopping",
       "salePrice": 1.25
     }
+  ],
+  "banana": [
+    {
+      "$type": "BlatantShopping.Sales.AboveThresholdSale, BlatantShopping",
+      "threshold": 2,
+      "priceEachAfterThreshold": 0.50
+    },
   ]
 }
