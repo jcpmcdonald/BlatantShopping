@@ -5,6 +5,10 @@ A console-based kiosk checkout system that calculates the best price for your sh
 - JSON is used for the price and sale catalogs
 - NUnit is used for unit testing
 
+# Usage
+    BlatantShopping.exe shoppingListFile
+Where the shoppingListFile is a flat text file containing one product name per line
+
 # Design Choices
 - Product names are case-insensitive. Apples are aPpLes. If I were to allow case sensitive products, I would move toward product IDs instead of names.
 - Exceptions are thrown to the user when there is an unrecoverable error. I try to [Fail Fast](https://en.wikipedia.org/wiki/Fail-fast), instead of progressing with flaws.
