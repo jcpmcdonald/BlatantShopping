@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using BlatantShopping.Sales;
 using Newtonsoft.Json;
 
@@ -41,8 +42,6 @@ namespace BlatantShopping.Services
 			return priceList;
 		}
 
-		
-
 
 
 		/// <summary>
@@ -54,17 +53,52 @@ namespace BlatantShopping.Services
 		/// <returns>The best price for the provided shopping list</returns>
 		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog)
 		{
+			// Throw away the receipt
+			StringBuilder receipt;
+			return GetPrice(shoppingList, priceCatalog, saleCatalog, out receipt);
+		}
+
+
+
+		/// <summary>
+		/// Returns the best price for the provided shopping list
+		/// </summary>
+		/// <param name="shoppingList">The shopping list, provided in a dictionary&gt;&lt; of products and quantities</param>
+		/// <param name="priceCatalog">A price catalog</param>
+		/// <param name="saleCatalog">A catalog of all the current sales</param>
+		/// <returns>The best price for the provided shopping list</returns>
+		public decimal GetPrice(Dictionary<String, int> shoppingList, Dictionary<String, decimal> priceCatalog, Dictionary<String, List<ISale>> saleCatalog, out StringBuilder receipt)
+		{
 			decimal total = 0;
+			decimal totalSavings = 0;
+			receipt = new StringBuilder();
 
 			// Go through each item in the shopping list and get the best price
 			foreach (var item in shoppingList)
 			{
-				decimal regularPrice = GetRegularPrice(item.Key, item.Value, priceCatalog);
-				decimal salePrice = GetPrice(item.Key, item.Value, priceCatalog, saleCatalog);
+				String product = item.Key;
+				int quantity = item.Value;
 
-				// TODO: Add a line item for the product, with the amount saved (if any)
+				decimal regularPrice = GetRegularPrice(product, quantity, priceCatalog);
+				decimal salePrice = GetPrice(product, quantity, priceCatalog, saleCatalog);
 
-				total += Math.Min(salePrice, regularPrice);
+				decimal pricePaid = Math.Min(salePrice, regularPrice);
+				receipt.AppendLine(String.Format("{1,4}{0,-20}{2,7}", product, quantity + "x ", pricePaid));
+
+				if (salePrice < regularPrice)
+				{
+					decimal savings = regularPrice - salePrice;
+					totalSavings += savings;
+					receipt.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "You saved", "(-" + savings + ")"));
+				}
+
+				total += pricePaid;
+			}
+
+			if (totalSavings > 0)
+			{
+				receipt.AppendLine();
+				receipt.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "Total saved", "(-" + totalSavings + ")"));
 			}
 
 			return total;

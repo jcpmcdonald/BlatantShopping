@@ -32,7 +32,11 @@ namespace BlatantShopping
 			var saleService = new SaleService();
 			var sales = saleService.GetSalesFromFile("saleCatalog.json");
 
-			Console.WriteLine(priceService.GetPrice(cart, priceCatalog, sales));
+			StringBuilder receipt;
+			decimal total = priceService.GetPrice(cart, priceCatalog, sales, out receipt);
+
+			Console.WriteLine(receipt);
+			Console.WriteLine("Total: {0}", total);
 			Console.ReadKey();
 		}
 	}
