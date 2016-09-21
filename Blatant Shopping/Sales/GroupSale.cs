@@ -33,5 +33,11 @@ namespace BlatantShopping.Sales
 			// Only applies to multiples of the group size
 			return (quantity / groupSize) * groupSize;
 		}
+
+
+		public string GetReasoning(int quantity)
+		{
+			return String.Format("{0}@ {1} for {2:C} = {3:C}", QuantityAppliedTo(quantity), groupSize, pricePerGroup, GetSalePrice(quantity));
+		}
 	}
 }

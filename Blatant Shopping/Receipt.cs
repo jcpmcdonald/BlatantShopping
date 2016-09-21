@@ -10,22 +10,38 @@ namespace BlatantShopping
 
 		public void AddProduct(int quantity, String product, decimal pricePaid)
 		{
-			receiptBuilder.AppendLine(String.Format("{0,4}{1,-20}{2,7}", quantity + "x ", product, pricePaid));
+			receiptBuilder.AppendLine();
+			receiptBuilder.AppendLine(String.Format("{0,4}{1,-30}{2,7:C}", quantity + "x ", product, pricePaid));
 		}
 
 
 		public void AddSavings(decimal savings)
 		{
-			receiptBuilder.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "You saved", "(-" + savings + ")"));
+			receiptBuilder.AppendLine(String.Format("{0,8}{1,26}{2,8}", "", "You saved ", "($" + savings + ")"));
 		}
 
 
 		public void AddTotalSaved(decimal totalSavings)
 		{
-			receiptBuilder.AppendLine();
-			receiptBuilder.AppendLine(String.Format("{0,8}{1,-16}{2,7}", "", "Total saved", "(-" + totalSavings + ")"));
+			receiptBuilder.AppendLine("".PadRight(42, '_'));
+			receiptBuilder.AppendLine(String.Format("{0,8}{1,-26}{2,8}", "", "Total saved ", "($" + totalSavings + ")"));
 		}
 
+		public void AddTotal(decimal total)
+		{
+			receiptBuilder.AppendLine();
+			receiptBuilder.AppendLine(String.Format("{0,-34}{1,8:C}", "Total ", total));
+		}
+
+
+		public void AddSaleReasoning(String saleReasoning)
+		{
+			String[] saleReasons = saleReasoning.Split('\n');
+			foreach (var saleReason in saleReasons)
+			{
+				receiptBuilder.AppendLine(String.Format("{0,8}{1,-16}", "", saleReason));
+			}
+		}
 
 		public override string ToString()
 		{

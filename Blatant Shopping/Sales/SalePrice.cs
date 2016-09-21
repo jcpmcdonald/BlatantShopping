@@ -1,4 +1,6 @@
-﻿namespace BlatantShopping.Sales
+﻿using System;
+
+namespace BlatantShopping.Sales
 {
 	class SalePrice : ISale
 	{
@@ -20,6 +22,12 @@
 		{
 			// Sale prices apply to any quantity of items
 			return quantity;
+		}
+
+
+		public string GetReasoning(int quantity)
+		{
+			return String.Format("{0}@ {1:C}ea = {2:C}", QuantityAppliedTo(quantity), salePrice, GetSalePrice(quantity));
 		}
 	}
 }

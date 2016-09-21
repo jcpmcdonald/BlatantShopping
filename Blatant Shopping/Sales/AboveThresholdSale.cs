@@ -33,5 +33,11 @@ namespace BlatantShopping.Sales
 		{
 			return (quantity >= threshold) ? quantity : 0;
 		}
+
+
+		public string GetReasoning(int quantity)
+		{
+			return String.Format("{0}@ Buy at least {1} for {2:C}ea = {3:C}", QuantityAppliedTo(quantity), threshold, priceEachAfterThreshold, GetSalePrice(quantity));
+		}
 	}
 }

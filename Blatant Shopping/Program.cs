@@ -36,7 +36,6 @@ namespace BlatantShopping
 			decimal total = priceService.GetPrice(cart, priceCatalog, sales, out receipt);
 
 			Console.WriteLine(receipt);
-			Console.WriteLine("Total: {0}", total);
 			Console.ReadKey();
 		}
 	}
