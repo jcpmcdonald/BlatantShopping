@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using BlatantShopping.Services;
@@ -21,11 +22,10 @@ namespace BlatantShopping
 				return;
 			}
 
-			Directory.SetCurrentDirectory("../../../Input Files/");
-
 			var cartService = new CartService();
 			var cart = cartService.GetCartFromFile(args[0]);
 
+			Directory.SetCurrentDirectory(Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location) + "../../../../Input Files/");
 			var priceService = new PriceService();
 			var priceCatalog = priceService.GetPriceCatalogFromFile("priceCatalog.json");
 
