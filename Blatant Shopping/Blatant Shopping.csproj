@@ -50,7 +50,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BasicTests.cs" />
+    <Compile Include="Sales\BelowThresholdSale.cs" />
     <Compile Include="Sales\GroupSale.cs" />
+    <Compile Include="Sales\AboveThresholdSale.cs" />
     <Compile Include="Services\CartService.cs" />
     <Compile Include="Sales\ISale.cs" />
     <Compile Include="Services\PriceService.cs" />

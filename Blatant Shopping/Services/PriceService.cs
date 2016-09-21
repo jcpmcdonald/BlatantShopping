@@ -93,21 +93,25 @@ namespace BlatantShopping.Services
 				return 0;
 			}
 
-			// Look for any sales
+			// Look for any sales, and recursively look for sales on the remaining items
 			decimal bestSalePrice = decimal.MaxValue;
 			if (saleCatalog != null && saleCatalog.ContainsKey(product.ToLower()))
 			{
 				var sales = saleCatalog[product.ToLower()];
 				foreach (var sale in sales)
 				{
+					// Check if this sale applies to the desired quantity
 					int quantityAppliedTo = sale.QuantityAppliedTo(quantity);
 					if (quantityAppliedTo > 0)
 					{
+						// See if any items were left out of the sale
 						int quantityLeftOut = quantity - quantityAppliedTo;
 						decimal salePrice = sale.GetSalePrice(quantity);
 
+						// Get the best price for the leftovers
 						decimal priceForLeftovers = GetPrice(product, quantityLeftOut, priceCatalog, saleCatalog);
 
+						// If we have found a cheaper price, update the best sale price found
 						if ((salePrice + priceForLeftovers) < bestSalePrice)
 						{
 							bestSalePrice = (salePrice + priceForLeftovers);
@@ -115,9 +119,6 @@ namespace BlatantShopping.Services
 					}
 				}
 			}
-			
-
-			// If any sales matched the product, but there are items that didn't fit in the sale, recursively find a price for the remaining
 
 
 			// Look up the regular price
@@ -132,7 +133,7 @@ namespace BlatantShopping.Services
 				throw new Exception(String.Format("Product '{0}' is missing a regular price", product));
 			}
 
-			// Return the cheapest price
+			// Return the cheapest price.
 			return Math.Min(bestSalePrice, regularPrice);
 		}
 	}
